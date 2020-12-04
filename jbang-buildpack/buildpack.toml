@@ -1,0 +1,13 @@
+# Buildpack API version
+api = "0.2"
+
+# Buildpack ID and metadata
+[buildpack]
+id = "dev.jbangdev.jbang.buildpack"
+version = "0.0.1"
+name = "Jbang Buildpack"
+
+# Stacks that the buildpack will work with
+[[stacks]]
+id = "io.buildpacks.samples.stacks.bionic"
+
