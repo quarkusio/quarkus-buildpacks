@@ -1,6 +1,6 @@
 # Buildpacks
 
-Just some builpacks I'm working on.
+Just some buildpacks I'm working on.
 
 To use buildpacks you'll need `pack`, see the instructions here on how to install it:
 
@@ -20,6 +20,14 @@ To test the buildpack for [Quarkus](https://quarkus.io) run this:
 
 ```
 pack build quarkus-test-app --path ./quarkus-sample-app --buildpack ./quarkus-buildpack --builder cnbs/sample-builder:bionic
+```
+
+## Running
+
+After having built the image with one of the commands above you can simply run them, eg:
+
+```
+docker run -ti --rm jbang-test-app
 ```
 
 ## Development
