@@ -11,53 +11,58 @@ gradleVersion=6.7.1
 layersdir=$1
 
 # 2. DOWNLOAD JAVA
-echo "---> Downloading and extracting Java"
 javalayer="$layersdir"/java
-mkdir -p "$javalayer"
-javaUrl="https://api.adoptopenjdk.net/v3/binary/latest/${javaVersion}/ga/linux/x64/jdk/hotspot/normal/adoptopenjdk"
-wget -q -O - "${javaUrl}" | tar xzm --strip-components=1 -C $javalayer
+if [[ ! -f $javalayer/bin/java ]]; then
+    echo "---> Downloading and extracting Java"
+    mkdir -p "$javalayer"
+    javaUrl="https://api.adoptopenjdk.net/v3/binary/latest/${javaVersion}/ga/linux/x64/jdk/hotspot/normal/adoptopenjdk"
+    wget -q -O - "${javaUrl}" | tar xzm --strip-components=1 -C $javalayer
+fi
+echo -e 'cache = true\nlaunch = true' > "$javalayer.toml"
 
 # 3. DOWNLOAD MAVEN or GRADLE
+usingWrapper=false
 builderlayer="$layersdir"/build
 mkdir -p "$builderlayer"
 if [[ -f pom.xml && ! -f mvnw ]]; then
-    echo "---> Downloading and extracting Maven"
-    mavenUrl="https://lang-jvm.s3.amazonaws.com/maven-${mavenVersion}.tar.gz"
-    wget -q -O - "${mavenUrl}" | tar xzm --strip-components=1 -C $builderlayer
-    builderDownloaded=true
+    if [[ ! -f $builderlayer/bin/mvn ]]; then
+        echo "---> Downloading and extracting Maven"
+        mavenUrl="https://lang-jvm.s3.amazonaws.com/maven-${mavenVersion}.tar.gz"
+        wget -q -O - "${mavenUrl}" | tar xzm --strip-components=1 -C $builderlayer
+    fi
 elif [[ -f build.gradle && ! -f gradlew ]]; then
-    echo "---> Downloading and extracting Gradle"
-    gradleUrl="https://services.gradle.org/distributions/gradle-${gradleVersion}-bin.zip"
-    wget -q -O - "${gradleUrl}" | tar xzm --strip-components=1 -C $builderlayer
-    builderDownloaded=true
+    if [[ ! -f $builderlayer/bin/gradle ]]; then
+        echo "---> Downloading and extracting Gradle"
+        gradleUrl="https://services.gradle.org/distributions/gradle-${gradleVersion}-bin.zip"
+        wget -q -O - "${gradleUrl}" | tar xzm --strip-components=1 -C $builderlayer
+    fi
 else
-    builderDownloaded=false
+    echo "---> Using locally available build wrapper"
+    usingWrapper=true
 fi
+echo -e 'cache = true\nlaunch = true' > "$builderlayer.toml"
 
-# 4. MAKE JAVA AND BUILDER AVAILABLE DURING LAUNCH
-echo -e 'launch = true' > "$javalayer.toml"
-echo -e 'launch = true' > "$builderlayer.toml"
+# 4. MAKE SURE DOWNLOADED ARTIFACTS WILL GET CACHED
+m2layer="$layersdir"/m2
+mkdir -p "$m2layer"
+ln -s "$m2layer" $HOME/.m2
+echo -e 'cache = true\nlaunch = true' > "$m2layer.toml"
 
 # 5. MAKE JAVA AVAILABLE TO THIS SCRIPT
 export PATH="$javalayer"/bin:$PATH
 export JAVA_HOME="$javalayer"
 
 # 6. MAKE MAVEN OR GRADLE AVAILABLE TO THIS SCRIPT
-if [ "$builderDownloaded" = true ]; then
+if [[ "$usingWrapper" = false ]]; then
     export PATH="$builderlayer"/bin:$PATH
 fi
-
-echo $javalayer
-ls -als $javalayer
-echo $builderlayer
-ls -als $builderlayer
 
 # 7. BUILD THE SCRIPT
 if [[ -f pom.xml ]]; then
     if [[ -f mvnw ]]; then
         mvnCommand=./mvnw
     else
-        mvnCommand=mvn
+        mvnCommand="$builderlayer"/bin/mvn
     fi
     buildCommand="$mvnCommand package"
     #buildCommand="$mvnCommand package -Pnative"
@@ -66,7 +71,7 @@ elif [[ -f build.gradle ]]; then
     if [[ -f gradlew ]]; then
         gradleCommand=./gradlew
     else
-        gradleCommand=gradlew
+        gradleCommand="$builderlayer"/bin/gradlew
     fi
     buildCommand="$gradleCommand build"
     #buildCommand="$gradleCommand buildNative"
@@ -74,11 +79,9 @@ elif [[ -f build.gradle ]]; then
 fi
 $buildCommand
 
-# TODO: $HOME/.m2 isn't getting cached
-
 # 8. SET DEFAULT START COMMAND
 cat > "$layersdir/launch.toml" <<EOL
 [[processes]]
 type = "web"
-command = "$runCommand"
+command = "ln -s \"$m2layer\" $HOME/.m2 ; $runCommand"
 EOL
