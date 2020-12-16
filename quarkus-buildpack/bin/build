@@ -43,7 +43,7 @@ if [[ -f pom.xml && ( "$useWrapper" = false || ! -f mvnw ) ]]; then
     mkdir -p "$builderlayer"
     if [[ ! -f $builderlayer/bin/mvn ]]; then
         echo "---> Downloading and extracting Maven"
-        mavenUrl="https://lang-jvm.s3.amazonaws.com/maven-${mavenVersion}.tar.gz"
+        mavenUrl="https://archive.apache.org/dist/maven/maven-3/${mavenVersion}/binaries/apache-maven-${mavenVersion}-bin.tar.gz"
         wget -q -O - "${mavenUrl}" | tar xzm --strip-components=1 -C $builderlayer
     fi
     echo -e 'cache = true\nbuild = true\nlaunch = true' > "$builderlayer.toml"
