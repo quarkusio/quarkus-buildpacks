@@ -3,61 +3,71 @@ set -eo pipefail
 
 echo "---> Quarkus Buildpack"
 
+# GET ARGS
+layersdir=$1
+plan=$3
+
+# GET CONFIGURATION
 javaVersion=11
 mavenVersion=3.6.3
 gradleVersion=6.7.1
+useWrapper=true
 
-# 1. GET ARGS
-layersdir=$1
+if [[ -f .buildpack.conf ]]; then
+   source .buildpack.conf
+fi
 
-# 2. DOWNLOAD JAVA
-javalayer="$layersdir"/java
+# CLEAN UP LAYER METADATA
+rm -f "$layersdir"/java_*.toml
+rm -f "$layersdir"/maven_*.toml
+rm -f "$layersdir"/gradle_*.toml
+
+# DOWNLOAD JAVA
+javalayer="$layersdir"/java_"$javaVersion"
 if [[ ! -f $javalayer/bin/java ]]; then
     echo "---> Downloading and extracting Java"
     mkdir -p "$javalayer"
     javaUrl="https://api.adoptopenjdk.net/v3/binary/latest/${javaVersion}/ga/linux/x64/jdk/hotspot/normal/adoptopenjdk"
     wget -q -O - "${javaUrl}" | tar xzm --strip-components=1 -C $javalayer
+    # MAKE JAVA AVAILABLE FOR NEXT STEPS
+    mkdir -p "$javalayer"/env
+    echo "$javalayer" > "$javalayer"/env/JAVA_HOME
 fi
-echo -e 'cache = true\nlaunch = true' > "$javalayer.toml"
+export JAVA_HOME="$javalayer"
+echo -e 'cache = true\nbuild = true\nlaunch = true' > "$javalayer.toml"
 
-# 3. DOWNLOAD MAVEN or GRADLE
+# DOWNLOAD MAVEN or GRADLE
 usingWrapper=false
-builderlayer="$layersdir"/build
-mkdir -p "$builderlayer"
-if [[ -f pom.xml && ! -f mvnw ]]; then
+if [[ -f pom.xml && ( "$useWrapper" = false || ! -f mvnw ) ]]; then
+    builderlayer="$layersdir"/maven_"$mavenVersion"
+    mkdir -p "$builderlayer"
     if [[ ! -f $builderlayer/bin/mvn ]]; then
         echo "---> Downloading and extracting Maven"
         mavenUrl="https://lang-jvm.s3.amazonaws.com/maven-${mavenVersion}.tar.gz"
         wget -q -O - "${mavenUrl}" | tar xzm --strip-components=1 -C $builderlayer
     fi
-elif [[ -f build.gradle && ! -f gradlew ]]; then
+    echo -e 'cache = true\nbuild = true\nlaunch = true' > "$builderlayer.toml"
+elif [[ -f build.gradle && ( "$useWrapper" = false || ! -f gradlew ) ]]; then
+    builderlayer="$layersdir"/gradle_"$gradleVersion"
+    mkdir -p "$builderlayer"
     if [[ ! -f $builderlayer/bin/gradle ]]; then
         echo "---> Downloading and extracting Gradle"
         gradleUrl="https://services.gradle.org/distributions/gradle-${gradleVersion}-bin.zip"
         wget -q -O - "${gradleUrl}" | tar xzm --strip-components=1 -C $builderlayer
     fi
+    echo -e 'cache = true\nbuild = true\nlaunch = true' > "$builderlayer.toml"
 else
     echo "---> Using locally available build wrapper"
     usingWrapper=true
 fi
-echo -e 'cache = true\nlaunch = true' > "$builderlayer.toml"
 
-# 4. MAKE SURE DOWNLOADED ARTIFACTS WILL GET CACHED
+# MAKE SURE DOWNLOADED ARTIFACTS WILL GET CACHED
 m2layer="$layersdir"/m2
 mkdir -p "$m2layer"
 ln -s "$m2layer" $HOME/.m2
 echo -e 'cache = true\nlaunch = true' > "$m2layer.toml"
 
-# 5. MAKE JAVA AVAILABLE TO THIS SCRIPT
-export PATH="$javalayer"/bin:$PATH
-export JAVA_HOME="$javalayer"
-
-# 6. MAKE MAVEN OR GRADLE AVAILABLE TO THIS SCRIPT
-if [[ "$usingWrapper" = false ]]; then
-    export PATH="$builderlayer"/bin:$PATH
-fi
-
-# 7. BUILD THE SCRIPT
+# BUILD THE APPLICATION
 if [[ -f pom.xml ]]; then
     if [[ -f mvnw ]]; then
         mvnCommand=./mvnw
@@ -79,7 +89,7 @@ elif [[ -f build.gradle ]]; then
 fi
 $buildCommand
 
-# 8. SET DEFAULT START COMMAND
+# SET DEFAULT START COMMAND
 cat > "$layersdir/launch.toml" <<EOL
 [[processes]]
 type = "web"
