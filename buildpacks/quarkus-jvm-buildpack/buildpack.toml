@@ -3,10 +3,10 @@ api = "0.2"
 
 # Buildpack ID and metadata
 [buildpack]
-id = "io.quarkus.buildpack"
+id = "io.quarkus.jvm.buildpack"
 version = "0.0.1"
-name = "Quarkus Buildpack"
+name = "Quarkus JVM Buildpack"
 
 # Stacks that the buildpack will work with
 [[stacks]]
-id = "io.buildpacks.samples.stacks.bionic"
+id = "io.buildpacks.quarkus.jvm"

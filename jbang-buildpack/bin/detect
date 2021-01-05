@@ -1,6 +1,0 @@
-#!/usr/bin/env bash
-set -eo pipefail
-
-if [[ ! -f main.java ]]; then
-   exit 100
-fi

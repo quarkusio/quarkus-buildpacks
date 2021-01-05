@@ -1,33 +1,35 @@
-# Buildpacks
+# Quarkus Buildpacks
 
-Just some buildpacks I'm working on.
+This are some WIP build stacks for building Quarkus applications using supported images like Red Hat OpenJDK and Red Hat Quarkus builder (Mandrel).
 
 To use buildpacks you'll need `pack`, see the instructions here on how to install it:
 
 https://buildpacks.io/docs/tools/pack/
 
-## Jbang
 
-To test the buildpack for [Jbang](https://jbang.dev) run this:
+## Installation
 
-```
-pack build jbang-test-app --path ./jbang-sample-app --buildpack ./jbang-buildpack --builder cnbs/sample-builder:bionic
-```
+To install the build packs run clone this repo and run the create-buildpacks.sh script.
 
-## Quarkus
+
+## Quarkus JVM
 
 To test the buildpack for [Quarkus](https://quarkus.io) run this:
 
 ```
-pack build quarkus-test-app --path ./quarkus-sample-app --buildpack ./quarkus-buildpack --builder cnbs/sample-builder:bionic
+pack build quarkus-jvm-test-app --path apps/quarkus-sample-app --builder redhat/quarkus-jvm-builder:latest --buildpack "io.quarkus.jvm.buildpack@0.0.1"
 ```
+
+## Quarkus Native
+
+Not implemented yet. 
 
 ## Running
 
 After having built the image with one of the commands above you can simply run them, eg:
 
 ```
-docker run -ti --rm jbang-test-app
+docker run -it --rm quarkus-jvm-test-app
 ```
 
 ## Development

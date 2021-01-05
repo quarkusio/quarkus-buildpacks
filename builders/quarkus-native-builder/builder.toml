@@ -1,0 +1,13 @@
+# Buildpacks to include in builder
+[[buildpacks]]
+id = "io.quarkus.native.buildpack"
+version = "0.0.1"
+uri = "../../buildpacks/quarkus-native-buildpack"
+
+
+# Stack that will be used by the builder
+[stack]
+id = "io.buildpacks.quarkus.native"
+run-image = "redhat/quarkus-stack-run:native"
+build-image = "redhat/quarkus-stack-build:native"
+

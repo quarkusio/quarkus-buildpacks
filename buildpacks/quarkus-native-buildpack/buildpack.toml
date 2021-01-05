@@ -3,11 +3,10 @@ api = "0.2"
 
 # Buildpack ID and metadata
 [buildpack]
-id = "dev.jbangdev.jbang.buildpack"
+id = "io.quarkus.native.buildpack"
 version = "0.0.1"
-name = "Jbang Buildpack"
+name = "Quarkus Native Buildpack"
 
 # Stacks that the buildpack will work with
 [[stacks]]
-id = "io.buildpacks.samples.stacks.bionic"
-
+id = "io.buildpacks.quarkus.native"

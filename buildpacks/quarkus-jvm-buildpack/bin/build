@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+
+set -eo pipefail
+
+echo "---> Quarkus Buildpack"
+
+# GET ARGS
+layersdir=$1
+plan=$3
+
+
+if [[ -f .buildpack.conf ]]; then
+   source .buildpack.conf
+fi
+
+echo "---> PWD $(pwd)"
+
+# CLEAN UP LAYER METADATA
+rm -f "$layersdir"/java_*.toml
+rm -f "$layersdir"/maven_*.toml
+rm -f "$layersdir"/gradle_*.toml
+
+# MAKE SURE DOWNLOADED ARTIFACTS WILL GET CACHED
+# TODO: Check why the layers are not getting cached.
+m2layer="$layersdir"/m2
+mkdir -p "$m2layer"
+ln -s "$m2layer" $HOME/.m2
+echo -e 'cache = true\nlaunch = true' > "$m2layer.toml"
+
+# BUILD THE APPLICATION
+if [[ -f pom.xml ]]; then
+    mvnCommand="mvn"
+    buildCommand="$mvnCommand package -DskipTests"
+    runCommand="/opt/jboss/container/java/run/run-java.sh"
+fi
+$buildCommand
+
+# SET DEFAULT START COMMAND
+cat > "$layersdir/launch.toml" <<EOL
+[[processes]]
+type = "web"
+command = "cp -r /workspace/target/lib /deployments; cp  /workspace/target/*-runner.jar /deployments/; $runCommand"
+EOL
