@@ -9,7 +9,7 @@ https://buildpacks.io/docs/tools/pack/
 
 ## Installation
 
-To install the build packs run clone this repo and run the create-buildpacks.sh script.
+To install the build packs run clone this repo and run the `create-buildpacks.sh` script.
 
 
 ## Quarkus JVM
