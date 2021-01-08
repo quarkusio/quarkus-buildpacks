@@ -2,23 +2,11 @@
 
 set -eo pipefail
 
-echo "---> Quarkus Buildpack"
+echo "---> Quarkus Native Buildpack"
 
 # GET ARGS
 layersdir=$1
 plan=$3
-
-
-if [[ -f .buildpack.conf ]]; then
-   source .buildpack.conf
-fi
-
-echo "---> PWD $(pwd)"
-
-# CLEAN UP LAYER METADATA
-rm -f "$layersdir"/java_*.toml
-rm -f "$layersdir"/maven_*.toml
-rm -f "$layersdir"/gradle_*.toml
 
 # MAKE SURE DOWNLOADED ARTIFACTS WILL GET CACHED
 # TODO: Check why the layers are not getting cached.

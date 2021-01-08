@@ -4,15 +4,3 @@ set -eo pipefail
 if [[ ! -f pom.xml ]]; then
    exit 101
 fi
-
-plan=$2
-javaVersion=11
-mavenVersion=3.6.3
-gradleVersion=6.7.1
-
-if [[ -f .buildpack.conf ]]; then
-   source .buildpack.conf
-fi
-
-echo "provides = [{ name = \"java\" }, { name = \"maven\" }, { name = \"gradle\" }]" > "$plan"
-echo "requires = [{ name = \"java\", version = \"$javaVersion\" }, { name = \"maven\", version = \"$mavenVersion\" }, { name = \"gradle\", version = \"$gradleVersion\" }]" >> "$plan"
