@@ -26,5 +26,5 @@ $buildCommand
 cat > "$layersdir/launch.toml" <<EOL
 [[processes]]
 type = "web"
-command = "cp -r /workspace/target/lib /deployments; cp  /workspace/target/*-runner.jar /deployments/; $runCommand"
+command = "ln -s /workspace/target/lib /deployments/lib; cp /workspace/target/*-runner.jar /deployments/; $runCommand"
 EOL
