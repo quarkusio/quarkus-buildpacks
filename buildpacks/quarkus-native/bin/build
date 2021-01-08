@@ -9,11 +9,10 @@ layersdir=$1
 plan=$3
 
 # MAKE SURE DOWNLOADED ARTIFACTS WILL GET CACHED
-# TODO: Check why the layers are not getting cached.
-m2layer="$layersdir"/m2
+m2layer="$layersdir"/m2repo
 mkdir -p "$m2layer"
-ln -s "$m2layer" $HOME/.m2
-echo -e 'cache = true\nlaunch = true' > "$m2layer.toml"
+ln -s "$m2layer" $HOME/.m2/repository
+echo -e 'cache = true' > "$m2layer.toml"
 
 # BUILD THE APPLICATION
 if [[ -f pom.xml ]]; then
