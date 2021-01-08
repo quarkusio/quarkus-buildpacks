@@ -1,9 +1,11 @@
 # Buildpacks to include in builder
 [[buildpacks]]
-id = "io.quarkus.native.buildpack"
-version = "0.0.1"
 uri = "../../buildpacks/quarkus-native-buildpack"
 
+[[order]]
+    [[order.group]]
+    id = "io.quarkus.native.buildpack"
+    version = "0.0.1"
 
 # Stack that will be used by the builder
 [stack]
