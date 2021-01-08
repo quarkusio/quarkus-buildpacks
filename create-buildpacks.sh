@@ -1,9 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-ID_PREFIX="io.buildpacks.quarkus"
-
-DEFAULT_PREFIX=redhat/quarkus-stack
+DEFAULT_PREFIX=redhat/buildpacks-stack-quarkus
 
 REPO_PREFIX=${DEFAULT_PREFIX}
 
@@ -23,7 +21,7 @@ done
 for builder_dir in $(find ${BUILDERS_DIR} -maxdepth 1 -mindepth 1 -type d)
 do
   echo "---> Creating builder for builder $(basename ${builder_dir})"
-  pack create-builder redhat/$(basename ${builder_dir}):latest --config ${builder_dir}/builder.toml
-  pack trust-builder redhat/$(basename ${builder_dir}):latest
+  pack create-builder redhat/buildpacks-builder-$(basename ${builder_dir}):latest --config ${builder_dir}/builder.toml
+  pack trust-builder redhat/buildpacks-builder-$(basename ${builder_dir}):latest
 done
 

@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 set -e
 
-ID_PREFIX="io.buildpacks.quarkus"
+ID_PREFIX="io.quarkus.buildpacks"
 
-DEFAULT_PREFIX=redhat/quarkus-stack
+DEFAULT_PREFIX=redhat/buildpacks-stack-quarkus
 
 REPO_PREFIX=${DEFAULT_PREFIX}
 
@@ -49,7 +49,7 @@ fi
 DIR=$(cd $(dirname $0) && pwd)
 IMAGE_DIR=$(realpath "${STACK_DIR}")
 TAG=$(basename "${IMAGE_DIR}")
-STACK_ID="${ID_PREFIX}.$(basename "${IMAGE_DIR}")"
+STACK_ID="${ID_PREFIX}.stack.$(basename "${IMAGE_DIR}")"
 BASE_IMAGE=${REPO_PREFIX}-base:${TAG}
 RUN_IMAGE=${REPO_PREFIX}-run:${TAG}
 BUILD_IMAGE=${REPO_PREFIX}-build:${TAG}

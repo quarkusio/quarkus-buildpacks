@@ -1,0 +1,14 @@
+# Buildpacks to include in builder
+[[buildpacks]]
+uri = "../../buildpacks/quarkus-jvm"
+
+[[order]]
+    [[order.group]]
+    id = "io.quarkus.buildpacks.buildpack.jvm"
+    version = "0.0.1"
+
+# Stack that will be used by the builder
+[stack]
+id = "io.quarkus.buildpacks.stack.jvm"
+run-image = "redhat/buildpacks-stack-quarkus-run:jvm"
+build-image = "redhat/buildpacks-stack-quarkus-build:jvm"

@@ -17,7 +17,7 @@ To install the build packs run clone this repo and run the `create-buildpacks.sh
 To test the buildpack for [Quarkus](https://quarkus.io) run this:
 
 ```
-pack build quarkus-jvm-test-app --path apps/quarkus-sample-app --builder redhat/quarkus-jvm-builder:latest --buildpack "io.quarkus.jvm.buildpack@0.0.1"
+pack build quarkus-jvm-test-app --path apps/quarkus-sample-app --builder redhat/buildpacks-builder-quarkus-jvm:latest
 ```
 
 ## Quarkus Native
