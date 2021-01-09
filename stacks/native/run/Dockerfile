@@ -10,3 +10,6 @@ ENV CNB_USER_ID=${cnb_uid}
 ENV CNB_GROUP_ID=${cnb_gid}
 
 LABEL io.buildpacks.stack.id="${stack_id}"
+
+CMD [ "/bin/bash" ]
+ENTRYPOINT []
