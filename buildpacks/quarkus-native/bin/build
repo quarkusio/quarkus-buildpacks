@@ -19,9 +19,9 @@ echo -e 'cache = true' > "$m2layer.toml"
 if [[ -f pom.xml ]]; then
     mvnCommand="mvn"
     buildCommand="$mvnCommand package -Pnative -DskipTests"
-    runCommand="/home/quarkus/application"
 fi
 $buildCommand
+runCommand=$(find /workspace/target -maxdepth 1 -name '*-runner')
 
 # SET DEFAULT START COMMAND
 cat > "$layersdir/launch.toml" <<EOL
