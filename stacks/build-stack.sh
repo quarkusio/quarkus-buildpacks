@@ -70,6 +70,6 @@ echo "STACK BUILT!"
 echo
 echo "Stack ID: ${STACK_ID}"
 echo "Images:"
-for IMAGE in "${BASE_IMAGE}" "${BUILD_IMAGE}" "${RUN_IMAGE}"; do
+for IMAGE in "${BUILD_IMAGE}" "${RUN_IMAGE}"; do
   echo "    ${IMAGE}"
 done
