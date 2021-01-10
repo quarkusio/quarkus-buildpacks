@@ -11,7 +11,7 @@ plan=$3
 # MAKE SURE DOWNLOADED ARTIFACTS WILL GET CACHED
 m2layer="$layersdir"/m2repo
 mkdir -p "$m2layer"
-mkdir -p $HOME/.m2/repository
+mkdir -p $HOME/.m2
 ln -s "$m2layer" $HOME/.m2/repository
 echo -e 'cache = true' > "$m2layer.toml"
 
