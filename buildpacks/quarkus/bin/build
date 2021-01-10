@@ -18,14 +18,21 @@ echo -e 'cache = true' > "$m2layer.toml"
 # BUILD THE APPLICATION
 if [[ -f pom.xml ]]; then
     mvnCommand="mvn"
-    buildCommand="$mvnCommand package -DskipTests"
-    runCommand="/opt/jboss/container/java/run/run-java.sh"
+    if [ -x "$(command -v native-image)" ]; then
+        buildCommand="$mvnCommand package -Pnative -DskipTests"
+    else
+        buildCommand="$mvnCommand package -DskipTests"
+        runCommand="ln -s /workspace/target/lib /deployments/lib; cp /workspace/target/*-runner.jar /deployments/; /opt/jboss/container/java/run/run-java.sh"
+    fi
 fi
 $buildCommand
+if [ -x "$(command -v native-image)" ]; then
+    runCommand=$(find /workspace/target -maxdepth 1 -name '*-runner')
+fi
 
 # SET DEFAULT START COMMAND
 cat > "$layersdir/launch.toml" <<EOL
 [[processes]]
 type = "web"
-command = "ln -s /workspace/target/lib /deployments/lib; cp /workspace/target/*-runner.jar /deployments/; $runCommand"
+command = "$runCommand"
 EOL

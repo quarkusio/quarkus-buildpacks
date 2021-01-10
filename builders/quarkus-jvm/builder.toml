@@ -1,10 +1,10 @@
 # Buildpacks to include in builder
 [[buildpacks]]
-uri = "../../buildpacks/quarkus-jvm"
+uri = "../../buildpacks/quarkus"
 
 [[order]]
     [[order.group]]
-    id = "io.quarkus.buildpacks.buildpack.jvm"
+    id = "io.quarkus.buildpacks.buildpack"
     version = "0.0.1"
 
 # Stack that will be used by the builder
