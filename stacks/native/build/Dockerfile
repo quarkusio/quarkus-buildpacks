@@ -4,8 +4,7 @@ ARG cnb_uid=1001
 ARG cnb_gid=1001
 
 USER root
-COPY ./bin/yj-linux /usr/local/bin/yj
-RUN dnf --setopt=tsflags=nodocs install -y maven jq
+RUN dnf --setopt=tsflags=nodocs install -y maven
 
 # Set required CNB information
 ARG stack_id

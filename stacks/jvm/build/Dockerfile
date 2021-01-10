@@ -7,8 +7,7 @@ FROM ${base_image}
 ARG stack_id
 
 USER root
-COPY ./bin/yj-linux /usr/local/bin/yj
-RUN dnf --setopt=tsflags=nodocs install -y maven jq
+RUN dnf --setopt=tsflags=nodocs install -y maven
 
 # Set required CNB information
 
