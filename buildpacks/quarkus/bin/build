@@ -2,7 +2,7 @@
 
 set -eo pipefail
 
-echo "---> Quarkus JVM Buildpack"
+echo "---> Quarkus Buildpack"
 
 # GET ARGS
 layersdir=$1
@@ -14,6 +14,8 @@ mkdir -p "$m2layer"
 mkdir -p $HOME/.m2
 ln -s "$m2layer" $HOME/.m2/repository
 echo -e 'cache = true' > "$m2layer.toml"
+
+export JAVA_HOME=/usr/lib/jvm/java-11-openjdk
 
 # BUILD THE APPLICATION
 if [[ -f pom.xml ]]; then
