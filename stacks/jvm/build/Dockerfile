@@ -6,9 +6,6 @@ FROM ${base_image}
 #ARG cnb_gid=185
 ARG stack_id
 
-USER root
-RUN dnf --setopt=tsflags=nodocs install -y maven
-
 # Set required CNB information
 
 ENV CNB_STACK_ID=${stack_id}
