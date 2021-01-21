@@ -1,6 +1,17 @@
 #!/usr/bin/env bash
 set -eo pipefail
 
-if [[ ! -f pom.xml ]]; then
-   exit 101
+echo "- Testing for Pom:"
+if [[ ! -f pom.xml ]]; then 
+  exit 100
+else
+  echo "- Checking for Quarkus in Pom"
+  grep io.quarkus pom.xml 2>&1 >/dev/null
+  RC=$?
+  if [[ $? != 0 ]]; then
+    exit 100
+  else
+    echo "- Found."
+  fi
 fi
+
