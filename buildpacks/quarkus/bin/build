@@ -1,40 +1,96 @@
 #!/usr/bin/env bash
 
+#TODO
+# - support build args via env var 
+
 set -eo pipefail
 
 echo "---> Quarkus Buildpack"
 
-# GET ARGS
-layersdir=$1
-plan=$3
+# Build script args : https://buildpacks.io/docs/reference/spec/buildpack-api/#binbuild
+APP_DIR=$PWD
+LAYERS_DIR=$1
+PLATFORM_DIR=$2
+BUILD_PLAN=$3
 
-# MAKE SURE DOWNLOADED ARTIFACTS WILL GET CACHED
-m2layer="$layersdir"/m2repo
-mkdir -p "$m2layer"
+# Is this a native build?
+if [ -x "$(command -v native-image)" ]; then
+    IS_NATIVE=1
+else
+    IS_NATIVE=0
+fi
+
+echo "Building $APP_DIR :: Native? $IS_NATIVE"
+
+# Create cache layer for m2 repo to ensure maven deps are cached between builds.
+mkdir -p $LAYERS_DIR/m2repo
 mkdir -p $HOME/.m2
-ln -s "$m2layer" $HOME/.m2/repository
-echo -e 'cache = true' > "$m2layer.toml"
+ln -s $LAYERS_DIR/m2repo $HOME/.m2/repository
+echo -e 'cache = true' > $LAYERS_DIR/m2repo.toml
 
 export JAVA_HOME=/usr/lib/jvm/java-11-openjdk
 
-# BUILD THE APPLICATION
+# Is there still a maven app to build? (other buildpacks could have removed pom.xml)
 if [[ -f pom.xml ]]; then
-    mvnCommand="mvn"
-    if [ -x "$(command -v native-image)" ]; then
-        buildCommand="$mvnCommand package -Pnative -DskipTests"
-    else
-        buildCommand="$mvnCommand package -DskipTests"
-        runCommand="ln -s /workspace/target/lib /deployments/lib; cp /workspace/target/*-runner.jar /deployments/; /opt/jboss/container/java/run/run-java.sh"
-    fi
-fi
-$buildCommand
-if [ -x "$(command -v native-image)" ]; then
-    runCommand=$(find /workspace/target -maxdepth 1 -name '*-runner')
-fi
 
-# SET DEFAULT START COMMAND
-cat > "$layersdir/launch.toml" <<EOL
+    mvnCommand="mvn"
+
+    if [ $IS_NATIVE == 1 ]; then
+        buildCommand="$mvnCommand package -B -Dnative -DskipTests"
+    else
+        buildCommand="$mvnCommand package -B -DskipTests"        
+    fi
+
+    # Build the project using appropriate maven command
+    echo "Building using $buildCommand"
+    $buildCommand
+
+    if [ $IS_NATIVE == 1 ]; then
+        targetBinary=$(find target -maxdepth 1 -name '*-runner')
+        targetBinary=${targetBinary#"target/"} 
+
+        #Move built app to a layer
+        echo "Copying app to app layer"
+        mkdir -p $LAYERS_DIR/0-app
+        cp target/$targetBinary $LAYERS_DIR/0-app
+        echo -e 'launch = true' > $LAYERS_DIR/0-app.toml
+
+        find $APP_DIR -mindepth 1 -delete
+
+        runCommand="$LAYERS_DIR/0-app/$targetBinary"
+    else        
+        targetJar=$(find target -maxdepth 1 -name '*-runner.jar')
+        targetJar=${targetJar#"target/"} 
+
+        echo "Building env config layer"
+        mkdir -p $LAYERS_DIR/0-ubiconfig/env.launch
+        echo $LAYERS_DIR/2-app/$targetJar > $LAYERS_DIR/0-ubiconfig/env.launch/JAVA_APP_JAR
+        echo -e 'launch = true' > $LAYERS_DIR/0-ubiconfig.toml  
+
+        #TODO no need for lib layer if building uber-jar
+        echo "Copying libs to libdeps layer"
+        mkdir -p $LAYERS_DIR/1-libdeps/lib
+        cp -rv target/lib $LAYERS_DIR/1-libdeps/
+        echo -e 'launch = true' > $LAYERS_DIR/1-libdeps.toml
+
+        #Move built app to a layer
+        echo "Copying app to app layer"
+        mkdir -p $LAYERS_DIR/2-app
+        cp target/$targetJar $LAYERS_DIR/2-app
+        ln -s $LAYERS_DIR/1-libdeps/lib  $LAYERS_DIR/2-app/lib
+        echo -e 'launch = true' > $LAYERS_DIR/2-app.toml
+
+        find $APP_DIR -mindepth 1 -delete       
+
+        runCommand="/opt/jboss/container/java/run/run-java.sh"
+    fi
+
+    # SET DEFAULT START COMMAND
+    cat > "$LAYERS_DIR/launch.toml" <<EOL
 [[processes]]
 type = "web"
 command = "$runCommand"
 EOL
+
+fi
+
