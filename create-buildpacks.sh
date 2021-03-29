@@ -21,7 +21,7 @@ done
 for builder_dir in $(find ${BUILDERS_DIR} -maxdepth 1 -mindepth 1 -type d)
 do
   echo "---> Creating builder for builder $(basename ${builder_dir})"
-  pack create-builder redhat/buildpacks-builder-$(basename ${builder_dir}):latest --config ${builder_dir}/builder.toml
-  pack trust-builder redhat/buildpacks-builder-$(basename ${builder_dir}):latest
+  pack builder create redhat/buildpacks-builder-$(basename ${builder_dir}):latest --config ${builder_dir}/builder.toml
+  pack config trusted-builders add redhat/buildpacks-builder-$(basename ${builder_dir}):latest
 done
 
