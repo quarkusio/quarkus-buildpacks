@@ -1,8 +1,5 @@
 #!/usr/bin/env bash
 
-#TODO
-# - support build args via env var 
-
 set -eo pipefail
 
 echo "---> Quarkus Buildpack"
@@ -35,10 +32,19 @@ if [[ -f pom.xml ]]; then
 
     mvnCommand="mvn"
 
-    if [ $IS_NATIVE == 1 ]; then
-        buildCommand="$mvnCommand package -B -Dnative -DskipTests"
+    # Disable maven build progress unless requested.
+    if [ "$MAVEN_ENABLE_TRANSFER_PROGRESS" == "true" ]; then 
+      echo "Maven transfer progress enabled."
+      suppressDownloadDownloadingMaven=""
     else
-        buildCommand="$mvnCommand package -B -DskipTests"        
+      echo "Maven transfer progress disabled."
+      suppressDownloadDownloadingMaven="--no-transfer-progress"
+    fi
+
+    if [ $IS_NATIVE == 1 ]; then
+        buildCommand="$mvnCommand package -B $suppressDownloadDownloadingMaven -Dnative -DskipTests"
+    else
+        buildCommand="$mvnCommand package -B $suppressDownloadDownloadingMaven -DskipTests"        
     fi
 
     # Build the project using appropriate maven command
@@ -70,7 +76,7 @@ if [[ -f pom.xml ]]; then
         #TODO no need for lib layer if building uber-jar
         echo "Copying libs to libdeps layer"
         mkdir -p $LAYERS_DIR/1-libdeps/lib
-        cp -rv target/lib $LAYERS_DIR/1-libdeps/
+        cp -r target/lib $LAYERS_DIR/1-libdeps/
         echo -e 'launch = true' > $LAYERS_DIR/1-libdeps.toml
 
         #Move built app to a layer
