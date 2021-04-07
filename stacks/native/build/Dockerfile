@@ -1,10 +1,7 @@
-FROM registry.access.redhat.com/quarkus/mandrel-20-rhel8:20.1
+FROM quay.io/quarkus/centos-quarkus-maven:21.0.0-java11
 
 ARG cnb_uid=1001
 ARG cnb_gid=1001
-
-USER root
-RUN dnf --setopt=tsflags=nodocs install -y maven
 
 # Set required CNB information
 ARG stack_id
