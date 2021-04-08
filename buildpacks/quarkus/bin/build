@@ -50,44 +50,60 @@ if [[ -f pom.xml ]]; then
     $buildCommand
 
     if [ $IS_NATIVE == 1 ]; then
-        targetBinary=$(find target -maxdepth 1 -name '*-runner')
-        targetBinary=${targetBinary#"target/"} 
+        targetBinary=$(find target -maxdepth 1 -name '*-runner' -printf %P)
+        if [[ -z $targetBinary ]]; then
+            echo "No native binary found. Aborting."
+            exit 100
+        fi
 
         #Move built app to a layer
         echo "Copying app to app layer"
         mkdir -p $LAYERS_DIR/0-app
-        cp target/$targetBinary $LAYERS_DIR/0-app
         echo -e 'launch = true' > $LAYERS_DIR/0-app.toml
-
-        find $APP_DIR -mindepth 1 -delete
+        cp target/$targetBinary $LAYERS_DIR/0-app
 
         runCommand="$LAYERS_DIR/0-app/$targetBinary"
-    else        
-        targetJar=$(find target -maxdepth 1 -name '*-runner.jar')
-        targetJar=${targetJar#"target/"} 
+    else
+        # Copy built app to a layer
+        echo "Copying app to app layer"
+        mkdir -p $LAYERS_DIR/1-app
+        echo -e 'launch = true' > $LAYERS_DIR/1-app.toml
+
+        if [[ -f "target/quarkus-app/quarkus-run.jar" ]]; then
+            # Project uses Quarkus' "fast-jar" packaging
+            targetJar="quarkus-run.jar"
+            cp -r target/quarkus-app/* $LAYERS_DIR/1-app
+            rm -rf $LAYERS_DIR/1-app/lib
+            libDir=target/quarkus-app/lib
+        else
+            # Project either uses Quarkus' "uber-jar" or "legacy-jar" packaging
+            targetJar=$(find target -maxdepth 1 -name '*-runner.jar' -printf %P)
+            if [[ -z $targetJar ]]; then
+                echo "No runnable JAR found. Aborting."
+                exit 100
+            fi
+            cp $targetJar $LAYERS_DIR/1-app
+            libDir=target/lib
+        fi
+
+        # If they exist, copy libs to a layer
+        if [[ -d $libDir ]]; then
+            echo "Copying libs to libdeps layer"
+            mkdir -p $LAYERS_DIR/2-libdeps/lib
+            echo -e 'launch = true' > $LAYERS_DIR/2-libdeps.toml
+            cp -r $libDir $LAYERS_DIR/2-libdeps/
+            ln -s $LAYERS_DIR/2-libdeps/lib  $LAYERS_DIR/1-app/lib
+        fi
 
         echo "Building env config layer"
         mkdir -p $LAYERS_DIR/0-ubiconfig/env.launch
-        echo $LAYERS_DIR/2-app/$targetJar > $LAYERS_DIR/0-ubiconfig/env.launch/JAVA_APP_JAR
         echo -e 'launch = true' > $LAYERS_DIR/0-ubiconfig.toml  
-
-        #TODO no need for lib layer if building uber-jar
-        echo "Copying libs to libdeps layer"
-        mkdir -p $LAYERS_DIR/1-libdeps/lib
-        cp -r target/lib $LAYERS_DIR/1-libdeps/
-        echo -e 'launch = true' > $LAYERS_DIR/1-libdeps.toml
-
-        #Move built app to a layer
-        echo "Copying app to app layer"
-        mkdir -p $LAYERS_DIR/2-app
-        cp target/$targetJar $LAYERS_DIR/2-app
-        ln -s $LAYERS_DIR/1-libdeps/lib  $LAYERS_DIR/2-app/lib
-        echo -e 'launch = true' > $LAYERS_DIR/2-app.toml
-
-        find $APP_DIR -mindepth 1 -delete       
+        echo $LAYERS_DIR/1-app/$targetJar > $LAYERS_DIR/0-ubiconfig/env.launch/JAVA_APP_JAR
 
         runCommand="/opt/jboss/container/java/run/run-java.sh"
     fi
+
+    find $APP_DIR -mindepth 1 -delete       
 
     # SET DEFAULT START COMMAND
     cat > "$LAYERS_DIR/launch.toml" <<EOL

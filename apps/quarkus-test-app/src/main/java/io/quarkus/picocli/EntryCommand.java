@@ -1,9 +1,13 @@
 package io.quarkus.picocli;
 
-import io.quarkus.picocli.runtime.annotations.TopCommand;
-import picocli.CommandLine;
+import io.quarkus.runtime.QuarkusApplication;
+import io.quarkus.runtime.annotations.QuarkusMain;
 
-@TopCommand
-@CommandLine.Command(mixinStandardHelpOptions = true, subcommands = { HelloCommand.class, GoodbyeCommand.class })
-public class EntryCommand {
+@QuarkusMain
+public class EntryCommand implements QuarkusApplication {
+  @Override
+  public int run(String... args) throws Exception {   
+    System.out.println("Hello World");
+    return 0;
+ }
 }
