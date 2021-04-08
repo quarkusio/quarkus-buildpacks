@@ -41,3 +41,9 @@ jobs:
         run: pack build quarkus-jvm-test-app --path apps/quarkus-sample-app --builder redhat/buildpacks-builder-quarkus-jvm:latest
       - name: Build example app (native)
         run: pack build quarkus-native-test-app --path apps/quarkus-sample-app --builder redhat/buildpacks-builder-quarkus-native:latest
+
+      # Test the resulting images
+      - name: Run example app (JVM)
+        run: docker run -t --rm quarkus-jvm-test-app
+      - name: Run example app (native)
+        run: docker run -t --rm quarkus-native-test-app
