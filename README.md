@@ -2,17 +2,17 @@
 
 This are some WIP build stacks for building Quarkus applications using supported images like Red Hat OpenJDK and Red Hat Quarkus builder (Mandrel).
 
-To use buildpacks you'll need `pack`, see the instructions here on how to install it:
+## Prerequisites
 
-https://buildpacks.io/docs/tools/pack/
+To use buildpacks the `pack` command is needed, see the instructions here on how to install it: https://buildpacks.io/docs/tools/pack/
 
+MacOS users will also need to install `coreutils` using something like `brew install coreutils`.
 
-## Installation
+## Creating Buildpacks
 
 To install the build packs run clone this repo and run the `create-buildpacks.sh` script.
 
-
-## Quarkus JVM
+## How to build for Quarkus JVM
 
 To test the buildpack for [Quarkus](https://quarkus.io) using the JVM run this:
 
@@ -20,7 +20,7 @@ To test the buildpack for [Quarkus](https://quarkus.io) using the JVM run this:
 pack build quarkus-jvm-test-app --path apps/quarkus-sample-app --builder redhat/buildpacks-builder-quarkus-jvm:latest
 ```
 
-## Quarkus Native
+## How to build for Quarkus Native
 
 To test the buildpack for [Quarkus](https://quarkus.io) compiling to native code run this:
 
@@ -28,7 +28,7 @@ To test the buildpack for [Quarkus](https://quarkus.io) compiling to native code
 pack build quarkus-native-test-app --path apps/quarkus-sample-app --builder redhat/buildpacks-builder-quarkus-native:latest
 ```
 
-## Running
+## Running the image
 
 After having built the image with one of the commands above you can simply run them, eg:
 
