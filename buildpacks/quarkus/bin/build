@@ -76,34 +76,42 @@ if [[ -f pom.xml ]]; then
             rm -rf $LAYERS_DIR/1-app/lib
             libDir=target/quarkus-app/lib
         else
-            # Project either uses Quarkus' "uber-jar" or "legacy-jar" packaging
+            # Project might be using Quarkus' "uber-jar" or "legacy-jar" packaging
             targetJar=$(find target -maxdepth 1 -name '*-runner.jar' -printf %P)
-            if [[ -z $targetJar ]]; then
-                echo "No runnable JAR found. Aborting."
-                exit 100
+            if [[ ! -z $targetJar ]]; then
+                cp $targetJar $LAYERS_DIR/1-app
+                libDir=target/lib
+            else
+                # This is for all other kinds of (non-Quarkus) projects
+                # We'll assume there's just a single jar
+                cp target/*.jar $LAYERS_DIR/1-app
+                # And we might just as well copy any libs if they exist
+                libDir=target/lib
             fi
-            cp $targetJar $LAYERS_DIR/1-app
-            libDir=target/lib
+        fi
+
+        echo "Building env config layer"
+        mkdir -p $LAYERS_DIR/0-ubiconfig/env.launch
+        echo -e 'launch = true' > $LAYERS_DIR/0-ubiconfig.toml
+        echo -e "$LAYERS_DIR/1-app" > $LAYERS_DIR/0-ubiconfig/env.launch/JAVA_APP_DIR
+        if [[ ! -z $targetJar ]]; then
+            echo -e "$LAYERS_DIR/1-app/$targetJar" > $LAYERS_DIR/0-ubiconfig/env.launch/JAVA_APP_JAR
         fi
 
         # If they exist, copy libs to a layer
-        if [[ -d $libDir ]]; then
+        if [[ ! -z $libDir && -d $libDir ]]; then
             echo "Copying libs to libdeps layer"
             mkdir -p $LAYERS_DIR/2-libdeps/lib
             echo -e 'launch = true' > $LAYERS_DIR/2-libdeps.toml
             cp -r $libDir $LAYERS_DIR/2-libdeps/
             ln -s $LAYERS_DIR/2-libdeps/lib  $LAYERS_DIR/1-app/lib
+            echo -e "$libDir" > $LAYERS_DIR/0-ubiconfig/env.launch/JAVA_LIB_DIR
         fi
-
-        echo "Building env config layer"
-        mkdir -p $LAYERS_DIR/0-ubiconfig/env.launch
-        echo -e 'launch = true' > $LAYERS_DIR/0-ubiconfig.toml  
-        echo $LAYERS_DIR/1-app/$targetJar > $LAYERS_DIR/0-ubiconfig/env.launch/JAVA_APP_JAR
 
         runCommand="/opt/jboss/container/java/run/run-java.sh"
     fi
 
-    find $APP_DIR -mindepth 1 -delete       
+    find $APP_DIR -mindepth 1 -delete
 
     # SET DEFAULT START COMMAND
     cat > "$LAYERS_DIR/launch.toml" <<EOL
@@ -113,4 +121,3 @@ command = "$runCommand"
 EOL
 
 fi
-
