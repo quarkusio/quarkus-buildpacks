@@ -1,4 +1,5 @@
-FROM registry.access.redhat.com/ubi8-minimal
+FROM quay.io/quarkus/quarkus-micro-image:1.0
+#FROM registry.access.redhat.com/ubi8-minimal
 
 ARG cnb_uid=1001
 ARG cnb_gid=1001
@@ -8,6 +9,8 @@ ARG stack_id
 ENV CNB_STACK_ID=${stack_id}
 ENV CNB_USER_ID=${cnb_uid}
 ENV CNB_GROUP_ID=${cnb_gid}
+
+USER $CNB_USER_ID
 
 LABEL io.buildpacks.stack.id="${stack_id}"
 
