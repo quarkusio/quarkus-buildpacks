@@ -1,79 +1,60 @@
-# Getting started with Quarkus
+# code-with-quarkus Project
 
-This is a minimal CRUD service exposing a couple of endpoints over REST.
+This project uses Quarkus, the Supersonic Subatomic Java Framework.
 
-Under the hood, this demo uses:
+If you want to learn more about Quarkus, please visit its website: https://quarkus.io/ .
 
-- RESTEasy to expose the REST endpoints
-- REST-assured and JUnit 5 for endpoint testing
+## Running the application in dev mode
 
-## Requirements
+You can run your application in dev mode that enables live coding using:
+```shell script
+./mvnw compile quarkus:dev
+```
 
-To compile and run this demo you will need:
+> **_NOTE:_**  Quarkus now ships with a Dev UI, which is available in dev mode only at http://localhost:8080/q/dev/.
 
-- JDK 1.8+
-- GraalVM
+## Packaging and running the application
 
-### Configuring GraalVM and JDK 1.8+
+The application can be packaged using:
+```shell script
+./mvnw package
+```
+It produces the `quarkus-run.jar` file in the `target/quarkus-app/` directory.
+Be aware that it’s not an _über-jar_ as the dependencies are copied into the `target/quarkus-app/lib/` directory.
 
-Make sure that both the `GRAALVM_HOME` and `JAVA_HOME` environment variables have
-been set, and that a JDK 1.8+ `java` command is on the path.
+The application is now runnable using `java -jar target/quarkus-app/quarkus-run.jar`.
 
-See the [Building a Native Executable guide](https://quarkus.io/guides/building-native-image-guide)
-for help setting up your environment.
+If you want to build an _über-jar_, execute the following command:
+```shell script
+./mvnw package -Dquarkus.package.type=uber-jar
+```
 
-## Building the application
+The application, packaged as an _über-jar_, is now runnable using `java -jar target/*-runner.jar`.
 
-Launch the Maven build on the checked out sources of this demo:
+## Creating a native executable
 
-> ./mvnw install
+You can create a native executable using: 
+```shell script
+./mvnw package -Pnative
+```
 
-### Live coding with Quarkus
+Or, if you don't have GraalVM installed, you can run the native executable build in a container using: 
+```shell script
+./mvnw package -Pnative -Dquarkus.native.container-build=true
+```
 
-The Maven Quarkus plugin provides a development mode that supports
-live coding. To try this out:
+You can then execute your native executable with: `./target/code-with-quarkus-1.0.0-SNAPSHOT-runner`
 
-> ./mvnw quarkus:dev
+If you want to learn more about building native executables, please consult https://quarkus.io/guides/maven-tooling.
 
-This command will leave Quarkus running in the foreground listening on port 8080.
+## Related Guides
 
-1. Visit the default endpoint: [http://127.0.0.1:8080](http://127.0.0.1:8080).
-    - Make a simple change to [src/main/resources/META-INF/resources/index.html](src/main/resources/META-INF/resources/index.html) file.
-    - Refresh the browser to see the updated page.
-2. Visit the `/hello` endpoint: [http://127.0.0.1:8080/hello](http://127.0.0.1:8080/hello)
-    - Update the response in [src/main/java/org/acme/quickstart/GreetingResource.java](src/main/java/org/acme/quickstart/GreetingResource.java). Replace `hello` with `hello there` in the `hello()` method.
-    - Refresh the browser. You should now see `hello there`.
-    - Undo the change, so the method returns `hello` again.
-    - Refresh the browser. You should now see `hello`.
+- RESTEasy JAX-RS ([guide](https://quarkus.io/guides/rest-json)): REST endpoint framework implementing JAX-RS and more
 
-### Run Quarkus in JVM mode
+## Provided Code
 
-When you're done iterating in developer mode, you can run the application as a
-conventional jar file.
+### RESTEasy JAX-RS
 
-First compile it:
+Easily start your RESTful Web Services
 
-> ./mvnw install
-
-Then run it:
-
-> java -jar ./target/getting-started-1.0-SNAPSHOT-runner.jar
-
-Have a look at how fast it boots, or measure the total native memory consumption.
-
-### Run Quarkus as a native executable
-
-You can also create a native executable from this application without making any
-source code changes. A native executable removes the dependency on the JVM:
-everything needed to run the application on the target platform is included in
-the executable, allowing the application to run with minimal resource overhead.
-
-Compiling a native executable takes a bit longer, as GraalVM performs additional
-steps to remove unnecessary codepaths. Use the  `native` profile to compile a
-native executable:
-
-> ./mvnw install -Dnative
-
-After getting a cup of coffee, you'll be able to run this executable directly:
-
-> ./target/getting-started-1.0-SNAPSHOT-runner
+[Related guide section...](https://quarkus.io/guides/getting-started#the-jax-rs-resources)
