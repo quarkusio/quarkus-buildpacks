@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 set -e
 
-DEFAULT_PREFIX=redhat/buildpacks-stack-quarkus
+DEFAULT_PREFIX=codejive/buildpacks
 
-REPO_PREFIX=${DEFAULT_PREFIX}
+REPO_PREFIX=${DEFAULT_PREFIX}-stack-quarkus
+BUILDER_PREFIX=${DEFAULT_PREFIX}-builder
 
 DIR=$(cd $(dirname $0) && pwd)
 STACKS_DIR=$DIR/stacks
@@ -21,7 +22,6 @@ done
 for builder_dir in $(find ${BUILDERS_DIR} -maxdepth 1 -mindepth 1 -type d)
 do
   echo "---> Creating builder for builder $(basename ${builder_dir})"
-  pack builder create redhat/buildpacks-builder-$(basename ${builder_dir}):latest --config ${builder_dir}/builder.toml
-  pack config trusted-builders add redhat/buildpacks-builder-$(basename ${builder_dir}):latest
+  pack builder create ${BUILDER_PREFIX}-$(basename ${builder_dir}):latest --config ${builder_dir}/builder.toml
+  pack config trusted-builders add ${BUILDER_PREFIX}-$(basename ${builder_dir}):latest
 done
-
