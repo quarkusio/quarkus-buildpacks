@@ -3,7 +3,7 @@ set -e
 
 ID_PREFIX="io.quarkus.buildpacks"
 
-DEFAULT_PREFIX=${DEFAULT_PREFIX:codejive/buildpacks-stack-quarkus}
+DEFAULT_PREFIX=${DEFAULT_PREFIX:codejive/buildpacks-quarkus}
 
 REPO_PREFIX=${DEFAULT_PREFIX}
 

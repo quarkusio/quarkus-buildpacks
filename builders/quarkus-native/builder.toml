@@ -10,5 +10,5 @@ uri = "../../buildpacks/quarkus"
 # Stack that will be used by the builder
 [stack]
 id = "io.quarkus.buildpacks.stack.native"
-run-image = "codejive/buildpacks-stack-quarkus-run:native"
-build-image = "codejive/buildpacks-stack-quarkus-build:native"
+run-image = "codejive/buildpacks-quarkus-run:native"
+build-image = "codejive/buildpacks-quarkus-build:native"
