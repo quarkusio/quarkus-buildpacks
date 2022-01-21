@@ -1,6 +1,6 @@
 # Buildpacks to include in builder
 [[buildpacks]]
-uri = "../../buildpacks/quarkus"
+uri = "../../../buildpacks/quarkus"
 
 [[order]]
     [[order.group]]
@@ -9,6 +9,6 @@ uri = "../../buildpacks/quarkus"
 
 # Stack that will be used by the builder
 [stack]
-id = "io.quarkus.buildpacks.stack.native"
-run-image = "codejive/buildpacks-quarkus-run:native"
-build-image = "codejive/buildpacks-quarkus-build:native"
+id = "io.quarkus.buildpacks.stack.jvm"
+run-image = "codejive/buildpacks-quarkus-run:jvm"
+build-image = "codejive/buildpacks-quarkus-build:jvm"

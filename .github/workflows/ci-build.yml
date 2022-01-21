@@ -38,9 +38,9 @@ jobs:
 
       # Test the buildpacks
       - name: Build example app (JVM)
-        run: pack build quarkus-jvm-test-app --path apps/quarkus-test-app --builder codejive/buildpacks-builder-quarkus-jvm:latest
+        run: pack build quarkus-jvm-test-app --path apps/quarkus-test-app --builder codejive/buildpacks-quarkus-builder:jvm
       - name: Build example app (native)
-        run: pack build quarkus-native-test-app --path apps/quarkus-test-app --builder codejive/buildpacks-builder-quarkus-native:latest
+        run: pack build quarkus-native-test-app --path apps/quarkus-test-app --builder codejive/buildpacks-quarkus-builder:native
 
       # Test the resulting images
       - name: Run example app (JVM)

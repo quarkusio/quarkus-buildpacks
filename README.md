@@ -17,7 +17,7 @@ To install the build packs run clone this repo and run the `create-buildpacks.sh
 To test the buildpack for [Quarkus](https://quarkus.io) using the JVM run this:
 
 ```
-pack build quarkus-jvm-test-app --path apps/quarkus-sample-app --builder codejive/buildpacks-builder-quarkus-jvm:latest
+pack build quarkus-jvm-test-app --path apps/quarkus-sample-app --builder codejive/buildpacks-quarkus-builder:jvm
 ```
 
 ## How to build for Quarkus Native
@@ -25,7 +25,7 @@ pack build quarkus-jvm-test-app --path apps/quarkus-sample-app --builder codejiv
 To test the buildpack for [Quarkus](https://quarkus.io) compiling to native code run this:
 
 ```
-pack build quarkus-native-test-app --path apps/quarkus-sample-app --builder codejive/buildpacks-builder-quarkus-native:latest
+pack build quarkus-native-test-app --path apps/quarkus-sample-app --builder codejive/buildpacks-quarkus-builder:native
 ```
 
 ## Running the image

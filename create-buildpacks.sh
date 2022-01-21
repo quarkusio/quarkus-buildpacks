@@ -4,7 +4,6 @@ set -e
 DEFAULT_PREFIX=codejive/buildpacks
 
 REPO_PREFIX=${DEFAULT_PREFIX}-quarkus
-BUILDER_PREFIX=${DEFAULT_PREFIX}-builder
 
 DIR=$(cd $(dirname $0) && pwd)
 STACKS_DIR=$DIR/stacks
@@ -22,8 +21,12 @@ done
 for builder_dir in $(find ${BUILDERS_DIR} -maxdepth 1 -mindepth 1 -type d)
 do
   BUILDER_NAME=$(basename ${builder_dir})
-  BUILDER=${BUILDER_PREFIX}-${BUILDER_NAME}
-  echo "---> Creating builder for builder ${BUILDER_NAME}"
-  pack builder create ${BUILDER}:latest --config ${builder_dir}/builder.toml
-  pack config trusted-builders add ${BUILDER}:latest
+  for builder_tag_dir in $(find ${builder_dir} -maxdepth 1 -mindepth 1 -type d)
+  do
+    BUILDER_TAG=$(basename ${builder_tag_dir})
+    BUILDER=${DEFAULT_PREFIX}-${BUILDER_NAME}-builder:${BUILDER_TAG}
+    echo "---> Creating builder for builder ${BUILDER}"
+    pack builder create ${BUILDER} --config ${builder_tag_dir}/builder.toml
+    pack config trusted-builders add ${BUILDER}
+  done
 done
